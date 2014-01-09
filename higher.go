@@ -76,6 +76,64 @@ func Tap(in interface{}, fn interface{}) interface{} {
 	return in
 }
 
+func Any(in interface{}, fn interface{}) bool {
+	var (
+		inValue    = reflect.ValueOf(in)
+		inValueLen = inValue.Len()
+		fnValue    = reflect.ValueOf(fn)
+	)
+	for i := 0; i < inValueLen; i++ {
+		args := []reflect.Value{inValue.Index(i)}
+		if fnValue.Call(args)[0].Bool() {
+			return true
+		}
+	}
+	return false
+}
+
+func Every(in interface{}, fn interface{}) bool {
+	var (
+		inValue    = reflect.ValueOf(in)
+		inValueLen = inValue.Len()
+		fnValue    = reflect.ValueOf(fn)
+	)
+	for i := 0; i < inValueLen; i++ {
+		args := []reflect.Value{inValue.Index(i)}
+		if !fnValue.Call(args)[0].Bool() {
+			return false
+		}
+	}
+	return true
+}
+
+func Contains(in interface{}, v interface{}) bool {
+	var (
+		inValue    = reflect.ValueOf(in)
+		inValueLen = inValue.Len()
+	)
+	for i := 0; i < inValueLen; i++ {
+		if reflect.DeepEqual(v, inValue.Index(i).Interface()) {
+			return true
+		}
+	}
+	return false
+}
+
+func Find(in interface{}, fn interface{}) interface{} {
+	var (
+		inValue    = reflect.ValueOf(in)
+		inValueLen = inValue.Len()
+		fnValue    = reflect.ValueOf(fn)
+	)
+	for i := 0; i < inValueLen; i++ {
+		val := inValue.Index(i)
+		args := []reflect.Value{val}
+		if fnValue.Call(args)[0].Bool() {
+			return val.Interface()
+		}
+	}
+}
+
 type wrapped struct {
 	value interface{}
 }
@@ -102,6 +160,22 @@ func (w wrapped) ForEach(fn interface{}) {
 
 func (w wrapped) Tap(fn interface{}) wrapped {
 	return wrapped{Tap(w.value, fn)}
+}
+
+func (w wrapped) Any(fn interface{}) bool {
+	return Any(w.value, fn)
+}
+
+func (w wrapped) Every(fn interface{}) bool {
+	return Every(w.value, fn)
+}
+
+func (w wrapped) Contains(v interface{}) bool {
+	return Contains(w.value, v)
+}
+
+func (w wrapped) Find(fn interface{}) interface{} {
+	return Find(w.value, fn)
 }
 
 func (w wrapped) Val() interface{} {

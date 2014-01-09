@@ -25,6 +25,10 @@ s := higher.Wrap([]int{1, 2, 3, 4, 5}).
 * `Reduce`
 * `ForEach`
 * `Tap`
+* `Any`
+* `Every`
+* `Contains`
+* `Find`
 
 ### Chaining 
 
