@@ -1,7 +1,7 @@
 # Higher
 
-> Higher order functions in Go (really unsafe)
-> You probably shouldn't use this
+> Higher order functions in Go (really unsafe).
+> You probably shouldn't use this.
 
 ``` go
 s1 := []int{1, 2, 3, 4, 5}
@@ -9,7 +9,7 @@ s2 := higher.Filter(s1, func(x int) bool { return x > 2 })
 s3 := higher.Map(s, strconv.Itoa).([]string)
 ```
 
-You can chain them too.
+### You can chain them too.
 
 ``` go
 s := higher.Wrap([]int{1, 2, 3, 4, 5}).
@@ -18,3 +18,15 @@ s := higher.Wrap([]int{1, 2, 3, 4, 5}).
         Val().([]string)
 ```
 
+### Available functions:
+
+* `Map`
+* `Filter`
+* `Reduce`
+* `ForEach`
+* `Tap`
+
+### Chaining 
+
+* `Wrap`
+* `Val`
