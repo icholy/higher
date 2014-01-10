@@ -3,6 +3,8 @@
 > Higher order functions in Go (really unsafe).
 > You probably shouldn't use this.
 
+![](http://i.imgur.com/KeG4PoE.gif)
+
 ``` go
 s1 := []int{1, 2, 3, 4, 5}
 s2 := higher.Filter(s1, func(x int) bool { return x > 2 })
