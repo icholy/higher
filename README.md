@@ -5,6 +5,10 @@
 
 ![](http://i.imgur.com/KeG4PoE.gif)
 
+[godoc](http://godoc.org/github.com/icholy/higher)
+
+### Examples
+
 ``` go
 s1 := []int{1, 2, 3, 4, 5}
 s2 := higher.Filter(s1, func(x int) bool { return x > 2 })
