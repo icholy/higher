@@ -1,4 +1,4 @@
-# Higher
+# Higher [![Build Status](https://travis-ci.org/icholy/higher.png?branch=master)](https://travis-ci.org/icholy/higher)
 
 > Higher order functions in Go (really unsafe).
 > You probably shouldn't use this.
