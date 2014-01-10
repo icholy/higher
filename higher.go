@@ -32,8 +32,7 @@ func Map(in interface{}, fn interface{}) interface{} {
 	)
 	for i := 0; i < inValueLen; i++ {
 		args[0] = inValue.Index(i)
-		rets := fnValue.Call(args)
-		outValue.Index(i).Set(rets[0])
+		outValue.Index(i).Set(fnValue.Call(args)[0])
 	}
 	return outValue.Interface()
 }
