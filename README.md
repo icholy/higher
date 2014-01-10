@@ -7,6 +7,8 @@
 
 [godoc](http://godoc.org/github.com/icholy/higher)
 
+> Joke being: you're probably high if you decide to actually use this package :)
+
 ### Examples
 
 ``` go
