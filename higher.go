@@ -27,13 +27,13 @@ func Map(in interface{}, fn interface{}) interface{} {
 		fnValue    = reflect.ValueOf(fn)
 		fnOutType  = reflect.TypeOf(fn).Out(0)
 		outType    = reflect.SliceOf(fnOutType)
-		outValue   = reflect.MakeSlice(outType, 0, inValueLen)
+		outValue   = reflect.MakeSlice(outType, inValueLen, inValueLen)
 		args       = make([]reflect.Value, 1)
 	)
 	for i := 0; i < inValueLen; i++ {
 		args[0] = inValue.Index(i)
 		rets := fnValue.Call(args)
-		outValue = reflect.Append(outValue, rets[0])
+		outValue.Index(i).Set(rets[0])
 	}
 	return outValue.Interface()
 }
