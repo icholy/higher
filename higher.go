@@ -142,50 +142,50 @@ func Find(in interface{}, fn interface{}) interface{} {
 	return nil
 }
 
-type wrapped struct {
+type Wrapped struct {
 	value interface{}
 }
 
-func Wrap(in interface{}) wrapped {
-	return wrapped{in}
+func Wrap(in interface{}) Wrapped {
+	return Wrapped{in}
 }
 
-func (w wrapped) Map(fn interface{}) wrapped {
-	return wrapped{Map(w.value, fn)}
+func (w Wrapped) Map(fn interface{}) Wrapped {
+	return Wrapped{Map(w.value, fn)}
 }
 
-func (w wrapped) Filter(fn interface{}) wrapped {
-	return wrapped{Filter(w.value, fn)}
+func (w Wrapped) Filter(fn interface{}) Wrapped {
+	return Wrapped{Filter(w.value, fn)}
 }
 
-func (w wrapped) Reduce(fn interface{}, acc interface{}) wrapped {
-	return wrapped{Reduce(w.value, fn, acc)}
+func (w Wrapped) Reduce(fn interface{}, acc interface{}) Wrapped {
+	return Wrapped{Reduce(w.value, fn, acc)}
 }
 
-func (w wrapped) ForEach(fn interface{}) {
+func (w Wrapped) ForEach(fn interface{}) {
 	ForEach(w.value, fn)
 }
 
-func (w wrapped) Tap(fn interface{}) wrapped {
-	return wrapped{Tap(w.value, fn)}
+func (w Wrapped) Tap(fn interface{}) Wrapped {
+	return Wrapped{Tap(w.value, fn)}
 }
 
-func (w wrapped) Any(fn interface{}) bool {
+func (w Wrapped) Any(fn interface{}) bool {
 	return Any(w.value, fn)
 }
 
-func (w wrapped) Every(fn interface{}) bool {
+func (w Wrapped) Every(fn interface{}) bool {
 	return Every(w.value, fn)
 }
 
-func (w wrapped) Contains(v interface{}) bool {
+func (w Wrapped) Contains(v interface{}) bool {
 	return Contains(w.value, v)
 }
 
-func (w wrapped) Find(fn interface{}) interface{} {
+func (w Wrapped) Find(fn interface{}) interface{} {
 	return Find(w.value, fn)
 }
 
-func (w wrapped) Val() interface{} {
+func (w Wrapped) Val() interface{} {
 	return w.value
 }
