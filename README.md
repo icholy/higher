@@ -13,8 +13,9 @@ s3 := higher.Map(s, strconv.Itoa).([]string)
 
 ``` go
 s := higher.Wrap([]int{1, 2, 3, 4, 5}).
-        Filter(s1, func(x int) bool { return x > 2 }).
-        Map(s, strconv.Itoa).
+        Filter(func(x int) bool { return x > 2 }).
+        Map(strconv.Itoa).
+        Tap(fmt.Println).
         Val().([]string)
 ```
 
