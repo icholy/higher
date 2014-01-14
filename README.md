@@ -26,7 +26,9 @@ s := higher.Wrap([]int{1, 2, 3, 4, 5}).
 ### Available functions:
 
 * `Map`
+* `PMap`
 * `Filter`
+* `PFilter`
 * `Reduce`
 * `ForEach`
 * `Tap`
