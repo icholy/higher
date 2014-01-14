@@ -27,9 +27,27 @@ func TestFilter(t *testing.T) {
 	}
 }
 
+func TestPFilter(t *testing.T) {
+	for _, test := range FilterTable {
+		out := PFilter(test.In, test.Fn)
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
 func TestFilterWrapped(t *testing.T) {
 	for _, test := range FilterTable {
 		out := Wrap(test.In).Filter(test.Fn).Val()
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
+func TestPFilterWrapped(t *testing.T) {
+	for _, test := range FilterTable {
+		out := Wrap(test.In).PFilter(test.Fn).Val()
 		if !reflect.DeepEqual(test.Out, out) {
 			t.Fatalf("%v should equal %v", out, test.Out)
 		}

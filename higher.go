@@ -21,8 +21,40 @@ func sliceFilter(inValue, fnValue reflect.Value) reflect.Value {
 	return outValue
 }
 
+func sliceParallelFilter(inValue, fnValue reflect.Value) reflect.Value {
+	var (
+		inType     = inValue.Type()
+		inValueLen = inValue.Len()
+		outValue   = reflect.MakeSlice(inType, 0, 1)
+		results    = make([]bool, inValueLen)
+		wg         sync.WaitGroup
+	)
+	wg.Add(inValueLen)
+	for i := 0; i < inValueLen; i++ {
+		go func(j int) {
+			args := []reflect.Value{inValue.Index(j)}
+			results[j] = fnValue.Call(args)[0].Bool()
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+	for i := 0; i < inValueLen; i++ {
+		if results[i] {
+			outValue = reflect.Append(outValue, inValue.Index(i))
+		}
+	}
+	return outValue
+}
+
 func Filter(in, fn interface{}) interface{} {
 	return sliceFilter(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	).Interface()
+}
+
+func PFilter(in, fn interface{}) interface{} {
+	return sliceParallelFilter(
 		reflect.ValueOf(in),
 		reflect.ValueOf(fn),
 	).Interface()
@@ -239,6 +271,15 @@ func (w Wrapped) PMap(fn interface{}) Wrapped {
 func (w Wrapped) Filter(fn interface{}) Wrapped {
 	return Wrapped{
 		value: sliceFilter(w.value, reflect.ValueOf(fn)),
+	}
+}
+
+func (w Wrapped) PFilter(fn interface{}) Wrapped {
+	return Wrapped{
+		value: sliceParallelFilter(
+			w.value,
+			reflect.ValueOf(fn),
+		),
 	}
 }
 
