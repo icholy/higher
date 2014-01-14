@@ -3,11 +3,7 @@
 > Higher order functions in Go (really unsafe).
 > You probably shouldn't use this.
 
-![](http://i.imgur.com/KeG4PoE.gif)
-
 [godoc](http://godoc.org/github.com/icholy/higher)
-
-> Joke being: you're probably high if you decide to actually use this package :)
 
 ### Examples
 
