@@ -2,12 +2,10 @@ package higher
 
 import "reflect"
 
-func Filter(in interface{}, fn interface{}) interface{} {
+func sliceFilter(inValue, fnValue reflect.Value) reflect.Value {
 	var (
-		inType     = reflect.TypeOf(in)
-		inValue    = reflect.ValueOf(in)
+		inType     = inValue.Type()
 		inValueLen = inValue.Len()
-		fnValue    = reflect.ValueOf(fn)
 		outValue   = reflect.MakeSlice(inType, 0, 1)
 		args       = make([]reflect.Value, 1)
 	)
@@ -17,15 +15,20 @@ func Filter(in interface{}, fn interface{}) interface{} {
 			outValue = reflect.Append(outValue, args[0])
 		}
 	}
-	return outValue.Interface()
+	return outValue
 }
 
-func Map(in interface{}, fn interface{}) interface{} {
+func Filter(in, fn interface{}) interface{} {
+	return sliceFilter(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	).Interface()
+}
+
+func sliceMap(inValue, fnValue reflect.Value) reflect.Value {
 	var (
-		inValue    = reflect.ValueOf(in)
 		inValueLen = inValue.Len()
-		fnValue    = reflect.ValueOf(fn)
-		fnOutType  = reflect.TypeOf(fn).Out(0)
+		fnOutType  = fnValue.Type().Out(0)
 		outType    = reflect.SliceOf(fnOutType)
 		outValue   = reflect.MakeSlice(outType, inValueLen, inValueLen)
 		args       = make([]reflect.Value, 1)
@@ -34,15 +37,19 @@ func Map(in interface{}, fn interface{}) interface{} {
 		args[0] = inValue.Index(i)
 		outValue.Index(i).Set(fnValue.Call(args)[0])
 	}
-	return outValue.Interface()
+	return outValue
 }
 
-func Reduce(in interface{}, fn interface{}, acc interface{}) interface{} {
+func Map(in, fn interface{}) interface{} {
+	return sliceMap(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	).Interface()
+}
+
+func sliceReduce(inValue, fnValue, accValue reflect.Value) reflect.Value {
 	var (
-		inValue    = reflect.ValueOf(in)
 		inValueLen = inValue.Len()
-		fnValue    = reflect.ValueOf(fn)
-		accValue   = reflect.ValueOf(acc)
 		args       = make([]reflect.Value, 2)
 	)
 	for i := 0; i < inValueLen; i++ {
@@ -50,14 +57,20 @@ func Reduce(in interface{}, fn interface{}, acc interface{}) interface{} {
 		args[1] = inValue.Index(i)
 		accValue = fnValue.Call(args)[0]
 	}
-	return accValue.Interface()
+	return accValue
 }
 
-func ForEach(in interface{}, fn interface{}) {
+func Reduce(in, fn, acc interface{}) interface{} {
+	return sliceReduce(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+		reflect.ValueOf(acc),
+	).Interface()
+}
+
+func sliceForEach(inValue, fnValue reflect.Value) {
 	var (
-		inValue    = reflect.ValueOf(in)
 		inValueLen = inValue.Len()
-		fnValue    = reflect.ValueOf(fn)
 		args       = make([]reflect.Value, 1)
 	)
 	for i := 0; i < inValueLen; i++ {
@@ -66,25 +79,35 @@ func ForEach(in interface{}, fn interface{}) {
 	}
 }
 
-func Tap(in interface{}, fn interface{}) interface{} {
+func ForEach(in, fn interface{}) {
+	sliceForEach(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	)
+}
+
+func sliceTap(inValue, fnValue reflect.Value) reflect.Value {
 	var (
-		inValue    = reflect.ValueOf(in)
 		inValueLen = inValue.Len()
-		fnValue    = reflect.ValueOf(fn)
 		args       = make([]reflect.Value, 1)
 	)
 	for i := 0; i < inValueLen; i++ {
 		args[0] = inValue.Index(i)
 		_ = fnValue.Call(args)
 	}
-	return in
+	return inValue
 }
 
-func Any(in interface{}, fn interface{}) bool {
+func Tap(in, fn interface{}) interface{} {
+	return sliceTap(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	).Interface()
+}
+
+func sliceAny(inValue, fnValue reflect.Value) bool {
 	var (
-		inValue    = reflect.ValueOf(in)
 		inValueLen = inValue.Len()
-		fnValue    = reflect.ValueOf(fn)
 		args       = make([]reflect.Value, 1)
 	)
 	for i := 0; i < inValueLen; i++ {
@@ -96,11 +119,16 @@ func Any(in interface{}, fn interface{}) bool {
 	return false
 }
 
-func Every(in interface{}, fn interface{}) bool {
+func Any(in, fn interface{}) bool {
+	return sliceAny(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	)
+}
+
+func sliceEvery(inValue, fnValue reflect.Value) bool {
 	var (
-		inValue    = reflect.ValueOf(in)
 		inValueLen = inValue.Len()
-		fnValue    = reflect.ValueOf(fn)
 		args       = make([]reflect.Value, 1)
 	)
 	for i := 0; i < inValueLen; i++ {
@@ -112,9 +140,15 @@ func Every(in interface{}, fn interface{}) bool {
 	return true
 }
 
-func Contains(in interface{}, v interface{}) bool {
+func Every(in, fn interface{}) bool {
+	return sliceEvery(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	)
+}
+
+func sliceContains(inValue reflect.Value, v interface{}) bool {
 	var (
-		inValue    = reflect.ValueOf(in)
 		inValueLen = inValue.Len()
 	)
 	for i := 0; i < inValueLen; i++ {
@@ -125,56 +159,82 @@ func Contains(in interface{}, v interface{}) bool {
 	return false
 }
 
-func Find(in interface{}, fn interface{}) interface{} {
+func Contains(in, v interface{}) bool {
+	return sliceContains(
+		reflect.ValueOf(in), v,
+	)
+}
+
+func sliceFind(inValue, fnValue reflect.Value) reflect.Value {
 	var (
-		inValue    = reflect.ValueOf(in)
 		inValueLen = inValue.Len()
-		fnValue    = reflect.ValueOf(fn)
 		args       = make([]reflect.Value, 1)
 	)
 	for i := 0; i < inValueLen; i++ {
 		args[0] = inValue.Index(i)
 		if fnValue.Call(args)[0].Bool() {
-			return args[0].Interface()
+			return args[0]
 		}
 	}
-	return nil
+	return reflect.Zero(inValue.Type().Elem())
+}
+
+func Find(in, fn interface{}) interface{} {
+	return sliceFind(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	).Interface()
 }
 
 type Wrapped struct {
-	value interface{}
+	value reflect.Value
 }
 
 func Wrap(in interface{}) Wrapped {
-	return Wrapped{in}
+	return Wrapped{reflect.ValueOf(in)}
 }
 
 func (w Wrapped) Map(fn interface{}) Wrapped {
-	return Wrapped{Map(w.value, fn)}
+	return Wrapped{
+		value: sliceMap(w.value, reflect.ValueOf(fn)),
+	}
 }
 
 func (w Wrapped) Filter(fn interface{}) Wrapped {
-	return Wrapped{Filter(w.value, fn)}
+	return Wrapped{
+		value: sliceFilter(w.value, reflect.ValueOf(fn)),
+	}
 }
 
 func (w Wrapped) Reduce(fn interface{}, acc interface{}) Wrapped {
-	return Wrapped{Reduce(w.value, fn, acc)}
+	return Wrapped{
+		value: sliceReduce(
+			w.value,
+			reflect.ValueOf(fn),
+			reflect.ValueOf(acc),
+		),
+	}
 }
 
 func (w Wrapped) ForEach(fn interface{}) {
-	ForEach(w.value, fn)
+	sliceForEach(w.value, reflect.ValueOf(fn))
 }
 
 func (w Wrapped) Tap(fn interface{}) Wrapped {
-	return Wrapped{Tap(w.value, fn)}
+	return Wrapped{
+		value: sliceTap(
+			w.value,
+			reflect.ValueOf(fn),
+		),
+	}
 }
 
 func (w Wrapped) Any(fn interface{}) bool {
-	return Any(w.value, fn)
+	return sliceAny(w.value, reflect.ValueOf(fn))
 }
 
 func (w Wrapped) Every(fn interface{}) bool {
-	return Every(w.value, fn)
+	return Every(w.value, reflect.ValueOf(fn))
 }
 
 func (w Wrapped) Contains(v interface{}) bool {
@@ -182,9 +242,9 @@ func (w Wrapped) Contains(v interface{}) bool {
 }
 
 func (w Wrapped) Find(fn interface{}) interface{} {
-	return Find(w.value, fn)
+	return sliceFind(w.value, reflect.ValueOf(fn)).Interface()
 }
 
 func (w Wrapped) Val() interface{} {
-	return w.value
+	return w.value.Interface()
 }
