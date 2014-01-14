@@ -57,9 +57,27 @@ func TestMap(t *testing.T) {
 	}
 }
 
+func TestPMap(t *testing.T) {
+	for _, test := range MapTable {
+		out := PMap(test.In, test.Fn)
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
 func TestMapWrapped(t *testing.T) {
 	for _, test := range MapTable {
 		out := Wrap(test.In).Map(test.Fn).Val()
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
+func TestPMapWrapped(t *testing.T) {
+	for _, test := range MapTable {
+		out := Wrap(test.In).PMap(test.Fn).Val()
 		if !reflect.DeepEqual(test.Out, out) {
 			t.Fatalf("%v should equal %v", out, test.Out)
 		}

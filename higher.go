@@ -1,6 +1,9 @@
 package higher
 
-import "reflect"
+import (
+	"reflect"
+	"sync"
+)
 
 func sliceFilter(inValue, fnValue reflect.Value) reflect.Value {
 	var (
@@ -40,8 +43,35 @@ func sliceMap(inValue, fnValue reflect.Value) reflect.Value {
 	return outValue
 }
 
+func sliceParallelMap(inValue, fnValue reflect.Value) reflect.Value {
+	var (
+		inValueLen = inValue.Len()
+		fnOutType  = fnValue.Type().Out(0)
+		outType    = reflect.SliceOf(fnOutType)
+		outValue   = reflect.MakeSlice(outType, inValueLen, inValueLen)
+		wg         sync.WaitGroup
+	)
+	wg.Add(inValueLen)
+	for i := 0; i < inValueLen; i++ {
+		go func(j int) {
+			args := []reflect.Value{inValue.Index(j)}
+			outValue.Index(j).Set(fnValue.Call(args)[0])
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+	return outValue
+}
+
 func Map(in, fn interface{}) interface{} {
 	return sliceMap(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	).Interface()
+}
+
+func PMap(in, fn interface{}) interface{} {
+	return sliceParallelMap(
 		reflect.ValueOf(in),
 		reflect.ValueOf(fn),
 	).Interface()
@@ -197,6 +227,12 @@ func Wrap(in interface{}) Wrapped {
 func (w Wrapped) Map(fn interface{}) Wrapped {
 	return Wrapped{
 		value: sliceMap(w.value, reflect.ValueOf(fn)),
+	}
+}
+
+func (w Wrapped) PMap(fn interface{}) Wrapped {
+	return Wrapped{
+		value: sliceParallelMap(w.value, reflect.ValueOf(fn)),
 	}
 }
 
