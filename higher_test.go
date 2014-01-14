@@ -27,6 +27,15 @@ func TestFilter(t *testing.T) {
 	}
 }
 
+func TestFilterWrapped(t *testing.T) {
+	for _, test := range FilterTable {
+		out := Wrap(test.In).Filter(test.Fn).Val()
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
 var MapTable = []struct {
 	In  interface{}
 	Out interface{}
@@ -42,6 +51,15 @@ var MapTable = []struct {
 func TestMap(t *testing.T) {
 	for _, test := range MapTable {
 		out := Map(test.In, test.Fn)
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
+func TestMapWrapped(t *testing.T) {
+	for _, test := range MapTable {
+		out := Wrap(test.In).Map(test.Fn).Val()
 		if !reflect.DeepEqual(test.Out, out) {
 			t.Fatalf("%v should equal %v", out, test.Out)
 		}
@@ -71,6 +89,15 @@ func TestReduce(t *testing.T) {
 	}
 }
 
+func TestReduceWrapped(t *testing.T) {
+	for _, test := range ReduceTable {
+		out := Wrap(test.In).Reduce(test.Fn, test.Acc).Val()
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
 var AnyTable = []struct {
 	In  interface{}
 	Out bool
@@ -86,6 +113,15 @@ var AnyTable = []struct {
 func TestAny(t *testing.T) {
 	for _, test := range AnyTable {
 		out := Any(test.In, test.Fn)
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
+func TestAnyWrapped(t *testing.T) {
+	for _, test := range AnyTable {
+		out := Wrap(test.In).Any(test.Fn)
 		if !reflect.DeepEqual(test.Out, out) {
 			t.Fatalf("%v should equal %v", out, test.Out)
 		}
@@ -113,6 +149,15 @@ func TestEvery(t *testing.T) {
 	}
 }
 
+func TestEveryWrapped(t *testing.T) {
+	for _, test := range EveryTable {
+		out := Wrap(test.In).Every(test.Fn)
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
 var ContainsTable = []struct {
 	In  interface{}
 	Val interface{}
@@ -123,6 +168,24 @@ var ContainsTable = []struct {
 		Val: true,
 		Out: true,
 	},
+}
+
+func TestContains(t *testing.T) {
+	for _, test := range ContainsTable {
+		out := Contains(test.In, test.Val)
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
+func TestContainsWrapped(t *testing.T) {
+	for _, test := range ContainsTable {
+		out := Wrap(test.In).Contains(test.Val)
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
 }
 
 var FindTable = []struct {
@@ -140,6 +203,15 @@ var FindTable = []struct {
 func TestFind(t *testing.T) {
 	for _, test := range FindTable {
 		out := Find(test.In, test.Fn)
+		if !reflect.DeepEqual(test.Out, out) {
+			t.Fatalf("%v should equal %v", out, test.Out)
+		}
+	}
+}
+
+func TestFindWrapped(t *testing.T) {
+	for _, test := range FindTable {
+		out := Wrap(test.In).Find(test.Fn)
 		if !reflect.DeepEqual(test.Out, out) {
 			t.Fatalf("%v should equal %v", out, test.Out)
 		}

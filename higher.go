@@ -234,11 +234,11 @@ func (w Wrapped) Any(fn interface{}) bool {
 }
 
 func (w Wrapped) Every(fn interface{}) bool {
-	return Every(w.value, reflect.ValueOf(fn))
+	return sliceEvery(w.value, reflect.ValueOf(fn))
 }
 
 func (w Wrapped) Contains(v interface{}) bool {
-	return Contains(w.value, v)
+	return sliceContains(w.value, v)
 }
 
 func (w Wrapped) Find(fn interface{}) interface{} {
