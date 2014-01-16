@@ -403,19 +403,28 @@ func Wrap(in interface{}) Wrapped {
 
 func (w Wrapped) Map(fn interface{}) Wrapped {
 	return Wrapped{
-		value: sliceMap(w.value, reflect.ValueOf(fn)),
+		value: sliceMap(
+			w.value,
+			reflect.ValueOf(fn),
+		),
 	}
 }
 
 func (w Wrapped) PMap(fn interface{}) Wrapped {
 	return Wrapped{
-		value: sliceParallelMap(w.value, reflect.ValueOf(fn)),
+		value: sliceParallelMap(
+			w.value,
+			reflect.ValueOf(fn),
+		),
 	}
 }
 
 func (w Wrapped) Filter(fn interface{}) Wrapped {
 	return Wrapped{
-		value: sliceFilter(w.value, reflect.ValueOf(fn)),
+		value: sliceFilter(
+			w.value,
+			reflect.ValueOf(fn),
+		),
 	}
 }
 
@@ -471,7 +480,10 @@ func (w Wrapped) PTap(fn interface{}) Wrapped {
 }
 
 func (w Wrapped) Any(fn interface{}) bool {
-	return sliceAny(w.value, reflect.ValueOf(fn))
+	return sliceAny(
+		w.value,
+		reflect.ValueOf(fn),
+	)
 }
 
 func (w Wrapped) PAny(fn interface{}) bool {
@@ -482,7 +494,10 @@ func (w Wrapped) PAny(fn interface{}) bool {
 }
 
 func (w Wrapped) Every(fn interface{}) bool {
-	return sliceEvery(w.value, reflect.ValueOf(fn))
+	return sliceEvery(
+		w.value,
+		reflect.ValueOf(fn),
+	)
 }
 
 func (w Wrapped) PEvery(fn interface{}) bool {
@@ -493,15 +508,24 @@ func (w Wrapped) PEvery(fn interface{}) bool {
 }
 
 func (w Wrapped) Contains(v interface{}) bool {
-	return sliceContains(w.value, v)
+	return sliceContains(
+		w.value,
+		v,
+	)
 }
 
 func (w Wrapped) PContains(v interface{}) bool {
-	return sliceParallelContains(w.value, v)
+	return sliceParallelContains(
+		w.value,
+		v,
+	)
 }
 
 func (w Wrapped) Find(fn interface{}) interface{} {
-	return sliceFind(w.value, reflect.ValueOf(fn)).Interface()
+	return sliceFind(
+		w.value,
+		reflect.ValueOf(fn),
+	).Interface()
 }
 
 func (w Wrapped) PFind(fn interface{}) interface{} {
