@@ -29,7 +29,7 @@ s := higher.Wrap([]int{1, 2, 3, 4, 5}).
 * `PMap`
 * `Filter`
 * `PFilter`
-* `Reduce`
+* `Reduce` reduce can't be parallel
 * `ForEach`
 * `PForEach`
 * `Tap`
