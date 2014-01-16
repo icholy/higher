@@ -141,6 +141,22 @@ func sliceForEach(inValue, fnValue reflect.Value) {
 	}
 }
 
+func sliceParallelForEach(inValue, fnValue reflect.Value) {
+	var (
+		inValueLen = inValue.Len()
+		wg         sync.WaitGroup
+	)
+	wg.Add(inValueLen)
+	for i := 0; i < inValueLen; i++ {
+		go func(j int) {
+			args := []reflect.Value{inValue.Index(j)}
+			_ = fnValue.Call(args)
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+}
+
 func ForEach(in, fn interface{}) {
 	sliceForEach(
 		reflect.ValueOf(in),
@@ -160,8 +176,31 @@ func sliceTap(inValue, fnValue reflect.Value) reflect.Value {
 	return inValue
 }
 
+func sliceParallelTap(inValue, fnValue reflect.Value) reflect.Value {
+	var (
+		inValueLen = inValue.Len()
+		wg         sync.WaitGroup
+	)
+	for i := 0; i < inValueLen; i++ {
+		go func(j int) {
+			args := []reflect.Value{inValue.Index(j)}
+			fnValue.Call(args)
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+	return inValue
+}
+
 func Tap(in, fn interface{}) interface{} {
 	return sliceTap(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	).Interface()
+}
+
+func PTap(in, fn interface{}) interface{} {
+	return sliceParallelTap(
 		reflect.ValueOf(in),
 		reflect.ValueOf(fn),
 	).Interface()
@@ -181,8 +220,34 @@ func sliceAny(inValue, fnValue reflect.Value) bool {
 	return false
 }
 
+func sliceParallelAny(inValue, fnValue reflect.Value) bool {
+	var (
+		inValueLen = inValue.Len()
+		ch         = make(chan bool, inValueLen)
+	)
+	for i := 0; i < inValueLen; i++ {
+		go func(j int) {
+			args := []reflect.Value{inValue.Index(j)}
+			ch <- fnValue.Call(args)[0].Bool()
+		}(i)
+	}
+	for x := range ch {
+		if x {
+			return true
+		}
+	}
+	return false
+}
+
 func Any(in, fn interface{}) bool {
 	return sliceAny(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	)
+}
+
+func PAny(in, fn interface{}) bool {
+	return sliceParallelAny(
 		reflect.ValueOf(in),
 		reflect.ValueOf(fn),
 	)
@@ -202,8 +267,34 @@ func sliceEvery(inValue, fnValue reflect.Value) bool {
 	return true
 }
 
+func sliceParallelEvery(inValue, fnValue reflect.Value) bool {
+	var (
+		inValueLen = inValue.Len()
+		ch         = make(chan bool, inValueLen)
+	)
+	for i := 0; i < inValueLen; i++ {
+		go func() {
+			args := []reflect.Value{inValue.Index(i)}
+			ch <- fnValue.Call(args)[0].Bool()
+		}()
+	}
+	for x := range ch {
+		if !x {
+			return false
+		}
+	}
+	return true
+}
+
 func Every(in, fn interface{}) bool {
 	return sliceEvery(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	)
+}
+
+func PEvery(in, fn interface{}) bool {
+	return sliceParallelEvery(
 		reflect.ValueOf(in),
 		reflect.ValueOf(fn),
 	)
@@ -221,8 +312,32 @@ func sliceContains(inValue reflect.Value, v interface{}) bool {
 	return false
 }
 
+func sliceParallelContains(inValue reflect.Value, v interface{}) bool {
+	var (
+		inValueLen = inValue.Len()
+		ch         = make(chan bool, inValueLen)
+	)
+	for i := 0; i < inValueLen; i++ {
+		go func(j int) {
+			ch <- reflect.DeepEqual(v, inValue.Index(i).Interface())
+		}(i)
+	}
+	for x := range ch {
+		if x {
+			return true
+		}
+	}
+	return false
+}
+
 func Contains(in, v interface{}) bool {
 	return sliceContains(
+		reflect.ValueOf(in), v,
+	)
+}
+
+func PContains(in, v interface{}) bool {
+	return sliceParallelContains(
 		reflect.ValueOf(in), v,
 	)
 }
@@ -241,8 +356,38 @@ func sliceFind(inValue, fnValue reflect.Value) reflect.Value {
 	return reflect.Zero(inValue.Type().Elem())
 }
 
+func sliceParallelFind(inValue, fnValue reflect.Value) reflect.Value {
+	var (
+		inValueLen = inValue.Len()
+		ch         = make(chan int, inValueLen)
+	)
+	for i := 0; i < inValueLen; i++ {
+		go func(j int) {
+			args := []reflect.Value{inValue.Index(j)}
+			if fnValue.Call(args)[0].Bool() {
+				ch <- j
+			} else {
+				ch <- -1
+			}
+		}(i)
+	}
+	for i := range ch {
+		if i != -1 {
+			return inValue.Index(i)
+		}
+	}
+	return reflect.Zero(inValue.Type().Elem())
+}
+
 func Find(in, fn interface{}) interface{} {
 	return sliceFind(
+		reflect.ValueOf(in),
+		reflect.ValueOf(fn),
+	).Interface()
+}
+
+func PFind(in, fn interface{}) interface{} {
+	return sliceParallelFind(
 		reflect.ValueOf(in),
 		reflect.ValueOf(fn),
 	).Interface()
@@ -294,7 +439,17 @@ func (w Wrapped) Reduce(fn interface{}, acc interface{}) Wrapped {
 }
 
 func (w Wrapped) ForEach(fn interface{}) {
-	sliceForEach(w.value, reflect.ValueOf(fn))
+	sliceForEach(
+		w.value,
+		reflect.ValueOf(fn),
+	)
+}
+
+func (w Wrapped) PForEach(fn interface{}) {
+	sliceParallelForEach(
+		w.value,
+		reflect.ValueOf(fn),
+	)
 }
 
 func (w Wrapped) Tap(fn interface{}) Wrapped {
@@ -306,20 +461,54 @@ func (w Wrapped) Tap(fn interface{}) Wrapped {
 	}
 }
 
+func (w Wrapped) PTap(fn interface{}) Wrapped {
+	return Wrapped{
+		value: sliceParallelTap(
+			w.value,
+			reflect.ValueOf(fn),
+		),
+	}
+}
+
 func (w Wrapped) Any(fn interface{}) bool {
 	return sliceAny(w.value, reflect.ValueOf(fn))
+}
+
+func (w Wrapped) PAny(fn interface{}) bool {
+	return sliceParallelAny(
+		w.value,
+		reflect.ValueOf(fn),
+	)
 }
 
 func (w Wrapped) Every(fn interface{}) bool {
 	return sliceEvery(w.value, reflect.ValueOf(fn))
 }
 
+func (w Wrapped) PEvery(fn interface{}) bool {
+	return sliceParallelEvery(
+		w.value,
+		reflect.ValueOf(fn),
+	)
+}
+
 func (w Wrapped) Contains(v interface{}) bool {
 	return sliceContains(w.value, v)
 }
 
+func (w Wrapped) PContains(v interface{}) bool {
+	return sliceParallelContains(w.value, v)
+}
+
 func (w Wrapped) Find(fn interface{}) interface{} {
 	return sliceFind(w.value, reflect.ValueOf(fn)).Interface()
+}
+
+func (w Wrapped) PFind(fn interface{}) interface{} {
+	return sliceParallelFind(
+		w.value,
+		reflect.ValueOf(fn),
+	).Interface()
 }
 
 func (w Wrapped) Val() interface{} {
