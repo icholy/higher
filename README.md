@@ -5,6 +5,8 @@
 
 [godoc](http://godoc.org/github.com/icholy/higher)
 
+![](higher.jpeg)
+
 ### Examples
 
 ``` go
@@ -48,4 +50,3 @@ s := higher.Wrap([]int{1, 2, 3, 4, 5}).
 * `Wrap`
 * `Val`
 
-![](higher.jpeg)
